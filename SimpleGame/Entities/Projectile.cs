@@ -4,6 +4,10 @@ using System.Windows.Shapes;
 
 namespace SimpleGame.Entities
 {
+
+    /// <summary>
+    /// Projectile class for Player and Enemies shoot
+    /// </summary>
     public class Projectile : GameObject
     {
 

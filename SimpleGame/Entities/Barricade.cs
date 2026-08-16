@@ -4,6 +4,9 @@ using System.Windows.Shapes;
 
 namespace SimpleGame.Entities
 {
+    /// <summary>
+    /// Class for barricade, no projectiles
+    /// </summary>
     public class Barricade : GameObject
     {
         public Barricade()

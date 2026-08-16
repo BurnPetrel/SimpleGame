@@ -4,8 +4,14 @@ using System.Windows.Shapes;
 
 namespace SimpleGame.Entities
 {
+
+    /// <summary>
+    /// Abstract class enemies, consist base methods and field to all enemies
+    /// </summary>
     public abstract class Enemy : GameObject
     {
+
+        public int Score { get; set; }
 
         public float MoveX(float value)
         {
@@ -18,6 +24,10 @@ namespace SimpleGame.Entities
 
     }
 
+
+    /// <summary>
+    /// Square enemy, closest to player, then less valuable
+    /// </summary>
     public class SquareEnemy : Enemy
     {
 
@@ -26,6 +36,7 @@ namespace SimpleGame.Entities
             Height = 20;
             Width = 20;
             Shape = ShapeType.Square;
+            Score = 10;
         }
 
         public override void CreateVisual()
@@ -41,11 +52,15 @@ namespace SimpleGame.Entities
 
     }
 
+    /// <summary>
+    /// Circle enemy class
+    /// </summary>
     public class CircleEnemy : Enemy
     {
 
         public CircleEnemy()
         {
+            Score = 20;
             Height = 20;
             Width = 20;
             Shape = ShapeType.Circle;
@@ -64,11 +79,15 @@ namespace SimpleGame.Entities
 
     }
 
+    /// <summary>
+    /// rhombus enemy class
+    /// </summary>
     public class RhombusEnemy : Enemy
     {
 
         public RhombusEnemy()
         {
+            Score = 30;
             Height = 20;
             Width = 20;
             Shape = ShapeType.Rhombus;

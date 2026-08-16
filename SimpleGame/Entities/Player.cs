@@ -5,6 +5,10 @@ using System.Windows.Shapes;
 
 namespace SimpleGame.Entities
 {
+
+    /// <summary>
+    /// Base Player class
+    /// </summary>
     public class Player : GameObject
     {
 
@@ -17,6 +21,9 @@ namespace SimpleGame.Entities
             Y = startY;
         }
 
+        /// <summary>
+        /// Create a visual model of player
+        /// </summary>
         public override void CreateVisual()
         {
             
@@ -35,6 +42,11 @@ namespace SimpleGame.Entities
                 };
             }
 
+        /// <summary>
+        /// Method to move player
+        /// </summary>
+        /// <param name="value">The magnitude of the displacement</param>
+        /// <returns></returns>
         public float MoveX(float value)
         {
             return (X = X + value);
