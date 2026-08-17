@@ -13,10 +13,12 @@ namespace SimpleGame.Entities
 
         public Projectile()
         {
-            Height = 3;
-            Width = 3;
+            Height = 8;
+            Width = 8;
             Shape = ShapeType.SmallRectangle;
         }
+
+        public bool IsPlayerBullet { get; set; }
 
         public override void CreateVisual()
         {
@@ -35,4 +37,5 @@ namespace SimpleGame.Entities
         }
 
     }
+        
 }

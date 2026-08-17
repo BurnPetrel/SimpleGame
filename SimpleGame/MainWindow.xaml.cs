@@ -26,10 +26,14 @@ namespace SimpleGame
             Loaded += OnLoaded;
         }
 
+        private bool _leftPressed;
+        private bool _rightPressed;
+
         private void OnLoaded(object sender, RoutedEventArgs e)
         {
             _world = new GameWorld();
             _world.SpawnEnemies();
+            _world.SpawnBarricades();
 
             _world.Player.CreateVisual();
             GameCanvas.Children.Add(_world.Player.Visual);
@@ -38,10 +42,36 @@ namespace SimpleGame
             {
                 enemy.CreateVisual();
                 GameCanvas.Children.Add(enemy.Visual);
+
             }
 
+            foreach (var barricade in _world.Barricades)
+            {
+                barricade.CreateVisual();
+                GameCanvas.Children.Add(barricade.Visual);
+                barricade.UpdateVisualPosition();
+            }
+
+            _world.Player.UpdateVisualPosition();
+            foreach (var enemy in _world.Enemies)
+                enemy.UpdateVisualPosition();
             _lastFrameTime = DateTime.UtcNow;
             CompositionTarget.Rendering += OnFrame;
+        }
+
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.Key == Key.Left) _leftPressed = true;
+            if (e.Key == Key.Right) _rightPressed = true;
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            if (e.Key == Key.Left) _leftPressed = false;
+            if (e.Key == Key.Right) _rightPressed = false;
+            base.OnKeyUp(e);
         }
 
         private DateTime _lastFrameTime;
@@ -52,7 +82,7 @@ namespace SimpleGame
             float deltaTime = (float)(now - _lastFrameTime).TotalSeconds;
             _lastFrameTime = now;
 
-            _world.Update(deltaTime);
+            _world.Update(deltaTime, _leftPressed, _rightPressed);
 
 
             _world.Player.UpdateVisualPosition();

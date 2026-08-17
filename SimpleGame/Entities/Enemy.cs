@@ -33,8 +33,8 @@ namespace SimpleGame.Entities
 
         public SquareEnemy()
         {
-            Height = 20;
-            Width = 20;
+            Height = 45;
+            Width = 45;
             Shape = ShapeType.Square;
             Score = 10;
         }
@@ -61,8 +61,8 @@ namespace SimpleGame.Entities
         public CircleEnemy()
         {
             Score = 20;
-            Height = 20;
-            Width = 20;
+            Height = 45;
+            Width = 45;
             Shape = ShapeType.Circle;
         }
 
@@ -88,8 +88,8 @@ namespace SimpleGame.Entities
         public RhombusEnemy()
         {
             Score = 30;
-            Height = 20;
-            Width = 20;
+            Height = 45;
+            Width = 45;
             Shape = ShapeType.Rhombus;
         }
 
@@ -101,12 +101,12 @@ namespace SimpleGame.Entities
                 Points = new PointCollection
             {
                 new Point(0, 0.5),
-                new Point(0.5, 0),
                 new Point(0.5, 1),
-                new Point(1, 0.5)
+                new Point(1, 0.5),
+                new Point(0.5, 0)
             },
                 Stretch = Stretch.Fill,
-                Fill = new SolidColorBrush(Colors.Yellow),
+                Fill = new SolidColorBrush(Colors.Pink),
                 Width = Width,
                 Height = Height
             };

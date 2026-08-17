@@ -14,8 +14,8 @@ namespace SimpleGame.Entities
 
         public Player(float startX, float startY)
         {
-            Height = 20;
-            Width = 20;
+            Height = 50;
+            Width = 50;
             Shape = ShapeType.Triangle;
             X = startX;
             Y = startY;
@@ -49,7 +49,10 @@ namespace SimpleGame.Entities
         /// <returns></returns>
         public float MoveX(float value)
         {
-            return (X = X + value);
+            X += value;
+            if (X < 0) X = 0;
+            if (X + Width > 780f) X = 780f - Width;
+            return X;
         }
 
     }

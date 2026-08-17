@@ -59,7 +59,7 @@ namespace SimpleGame.Entities
         public void UpdateVisualPosition()
         {
             Canvas.SetLeft(Visual, X);
-            Canvas.SetRight(Visual, Y);
+            Canvas.SetTop(Visual, Y);
 
         }
 
