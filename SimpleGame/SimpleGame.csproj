@@ -8,4 +8,26 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Sounds\background.mp3" />
+    <None Remove="Sounds\EnemyDeath.wav" />
+    <None Remove="Sounds\PlayerDeath.wav" />
+    <None Remove="Sounds\shoot.wav" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Sounds\background.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Sounds\EnemyDeath.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Sounds\PlayerDeath.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Sounds\shoot.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

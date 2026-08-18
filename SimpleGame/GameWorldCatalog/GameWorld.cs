@@ -86,6 +86,9 @@ namespace SimpleGame.GameWorldCatalog
 
             Projectiles.Add(proj);
             NewVisuals.Add(proj);
+
+            SoundManager.PlayShootSound();
+
         }
 
         private void SpawnEnemyProjectile (Enemy shooter)
@@ -210,7 +213,9 @@ namespace SimpleGame.GameWorldCatalog
                         toRemove.Add(proj);
                         toRemove.Add(enemy);
                         UpdateScore(enemy.Score);
+                        SoundManager.PlayEnemyDeathSound();
                         break;
+                        
                     }
                 }
             }
@@ -236,7 +241,7 @@ namespace SimpleGame.GameWorldCatalog
                 {
                     toRemove.Add(proj);
                     PlayerLives--;
-
+                    SoundManager.PlayPlayerDeathSound();
                     if (PlayerLives <= 0)
                     {
                         IsGameOver = true;

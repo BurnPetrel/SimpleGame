@@ -1,24 +1,23 @@
-﻿using System.Text;
+﻿using SimpleGame.Entities;
+using SimpleGame.GameWorldCatalog;
+using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using SimpleGame.GameWorldCatalog;
-using SimpleGame.Entities;
 
 namespace SimpleGame
 {
-    /// <summary>
-    ///Draw the world
-    /// </summary>
     public partial class MainWindow : Window
     {
         private GameWorld _world;
+        private DateTime _lastFrameTime;
+
+        private bool _spacePressed;
+        private bool _leftPressed;
+        private bool _rightPressed;
+
+        private enum GameState { Menu, Playing, GameOver }
+        private GameState _currentState = GameState.Menu;
 
         public MainWindow()
         {
@@ -26,11 +25,35 @@ namespace SimpleGame
             Loaded += OnLoaded;
         }
 
-        private bool _spacePressed;
-        private bool _leftPressed;
-        private bool _rightPressed;
-
         private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            _currentState = GameState.Menu;
+            UpdateMenuVisibility();
+        }
+
+        private void UpdateMenuVisibility()
+        {
+            if (_currentState == GameState.Menu)
+            {
+                MenuOverlay.Visibility = Visibility.Visible;
+                MenuTitle.Text = "Simple Game";
+                StartButton.Visibility = Visibility.Visible;
+                RestartButton.Visibility = Visibility.Collapsed;
+            }
+            else if (_currentState == GameState.GameOver)
+            {
+                MenuOverlay.Visibility = Visibility.Visible;
+                MenuTitle.Text = "GAME OVER";
+                StartButton.Visibility = Visibility.Collapsed;
+                RestartButton.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                MenuOverlay.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void InitializeGame()
         {
             _world = new GameWorld();
             _world.SpawnEnemies();
@@ -38,7 +61,6 @@ namespace SimpleGame
 
             _world.Player.CreateVisual();
             GameCanvas.Children.Add(_world.Player.Visual);
-
 
             foreach (var barricade in _world.Barricades)
             {
@@ -48,12 +70,39 @@ namespace SimpleGame
             }
 
             _world.Player.UpdateVisualPosition();
-
             _lastFrameTime = DateTime.UtcNow;
+
+            LivesTextBlock.Text = $"Lives: {_world.PlayerLives}";
+            ScoreTextBlock.Text = $"Score: {_world.PlayerScore}";
+
             CompositionTarget.Rendering += OnFrame;
         }
 
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            _currentState = GameState.Playing;
+            UpdateMenuVisibility();
+            InitializeGame();
 
+            SoundManager.Initialize();
+            SoundManager.PlayBackgroundMusic();
+
+        }
+
+        private void RestartButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            GameCanvas.Children.Clear();
+
+            _currentState = GameState.Playing;
+            UpdateMenuVisibility();
+            InitializeGame();
+        }
+
+        private void ExitButton_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -71,17 +120,16 @@ namespace SimpleGame
             base.OnKeyUp(e);
         }
 
-        private DateTime _lastFrameTime;
-
         private void OnFrame(object? sender, EventArgs e)
         {
+            if (_currentState != GameState.Playing) return;
+
             var now = DateTime.UtcNow;
             float deltaTime = (float)(now - _lastFrameTime).TotalSeconds;
             _lastFrameTime = now;
 
             _world.Update(deltaTime, _leftPressed, _rightPressed, _spacePressed);
 
-            // Добавляем новые визуалы
             foreach (var obj in _world.NewVisuals)
             {
                 obj.CreateVisual();
@@ -89,14 +137,12 @@ namespace SimpleGame
             }
             _world.NewVisuals.Clear();
 
-            // Удаляем мёртвые визуалы
             foreach (var obj in _world.RemovedVisuals)
             {
                 GameCanvas.Children.Remove(obj.Visual);
             }
             _world.RemovedVisuals.Clear();
 
-            // Обновляем позиции
             _world.Player.UpdateVisualPosition();
             foreach (var enemy in _world.Enemies)
                 enemy.UpdateVisualPosition();
@@ -108,8 +154,9 @@ namespace SimpleGame
 
             if (_world.IsGameOver)
             {
-                ScoreTextBlock.Text = $"Game Over! Score: {_world.PlayerScore}";
-                ScoreTextBlock.Foreground = System.Windows.Media.Brushes.Red; 
+                _currentState = GameState.GameOver;
+                UpdateMenuVisibility();
+                CompositionTarget.Rendering -= OnFrame;
             }
         }
     }
