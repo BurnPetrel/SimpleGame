@@ -26,6 +26,7 @@ namespace SimpleGame
             Loaded += OnLoaded;
         }
 
+        private bool _spacePressed;
         private bool _leftPressed;
         private bool _rightPressed;
 
@@ -38,12 +39,6 @@ namespace SimpleGame
             _world.Player.CreateVisual();
             GameCanvas.Children.Add(_world.Player.Visual);
 
-            foreach (var enemy in _world.Enemies)
-            {
-                enemy.CreateVisual();
-                GameCanvas.Children.Add(enemy.Visual);
-
-            }
 
             foreach (var barricade in _world.Barricades)
             {
@@ -53,17 +48,18 @@ namespace SimpleGame
             }
 
             _world.Player.UpdateVisualPosition();
-            foreach (var enemy in _world.Enemies)
-                enemy.UpdateVisualPosition();
+
             _lastFrameTime = DateTime.UtcNow;
             CompositionTarget.Rendering += OnFrame;
         }
+
 
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.Key == Key.Left) _leftPressed = true;
             if (e.Key == Key.Right) _rightPressed = true;
+            if (e.Key == Key.Space) _spacePressed = true;
             base.OnKeyDown(e);
         }
 
@@ -71,6 +67,7 @@ namespace SimpleGame
         {
             if (e.Key == Key.Left) _leftPressed = false;
             if (e.Key == Key.Right) _rightPressed = false;
+            if (e.Key == Key.Space) _spacePressed = false;
             base.OnKeyUp(e);
         }
 
@@ -82,12 +79,29 @@ namespace SimpleGame
             float deltaTime = (float)(now - _lastFrameTime).TotalSeconds;
             _lastFrameTime = now;
 
-            _world.Update(deltaTime, _leftPressed, _rightPressed);
+            _world.Update(deltaTime, _leftPressed, _rightPressed, _spacePressed);
 
+            // Добавляем новые визуалы
+            foreach (var obj in _world.NewVisuals)
+            {
+                obj.CreateVisual();
+                GameCanvas.Children.Add(obj.Visual);
+            }
+            _world.NewVisuals.Clear();
 
+            // Удаляем мёртвые визуалы
+            foreach (var obj in _world.RemovedVisuals)
+            {
+                GameCanvas.Children.Remove(obj.Visual);
+            }
+            _world.RemovedVisuals.Clear();
+
+            // Обновляем позиции
             _world.Player.UpdateVisualPosition();
             foreach (var enemy in _world.Enemies)
                 enemy.UpdateVisualPosition();
+            foreach (var proj in _world.Projectiles)
+                proj.UpdateVisualPosition();
         }
     }
 }

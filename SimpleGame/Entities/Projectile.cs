@@ -10,22 +10,20 @@ namespace SimpleGame.Entities
     /// </summary>
     public class Projectile : GameObject
     {
+        public bool IsPlayerBullet { get; set; }
 
         public Projectile()
         {
             Height = 8;
-            Width = 8;
+            Width = 5;
             Shape = ShapeType.SmallRectangle;
         }
 
-        public bool IsPlayerBullet { get; set; }
-
         public override void CreateVisual()
         {
-
             Visual = new Rectangle
             {
-                Fill = new SolidColorBrush(Colors.Red),
+                Fill = new SolidColorBrush(IsPlayerBullet ? Colors.Red : Colors.Cyan),
                 Width = Width,
                 Height = Height
             };
@@ -33,9 +31,9 @@ namespace SimpleGame.Entities
 
         public float MoveY(float value)
         {
-            return (Y = Y + value);
+            Y += value;
+            return Y;
         }
-
     }
-        
+
 }

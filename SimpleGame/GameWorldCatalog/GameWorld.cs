@@ -15,6 +15,11 @@ namespace SimpleGame.GameWorldCatalog
         private const int EnemyRows = 5;
 
         private const int BarricadeCount = 4;
+
+        private const float ProjectileSpeed = 400f;
+        private bool _canPlayerShoot = true;
+        public List<GameObject> NewVisuals { get; } = new();
+        public List<GameObject> RemovedVisuals { get; } = new();
         private const int BarricadeBlocksX = 20;
         private const int BarricadeBlocksY = 10;
         private const float BarricadeStartX = 45f;
@@ -26,7 +31,7 @@ namespace SimpleGame.GameWorldCatalog
 
         private const int EnemyCols = 9;
 
-        private const float EnemySpeed = 30f;
+        private const float EnemySpeed = 15f;
 
         private const float BarricadeSpacing = 100f;
 
@@ -43,16 +48,15 @@ namespace SimpleGame.GameWorldCatalog
         private const float BarricadeSize = 5f;
         private const float EnemySpacingX = EnemySize / 4f;
         private const float EnemySpacingY = EnemySize / 4f;
-        private const float EnemyStartX = 50f;
-        private const float EnemyStartY = 30f;
+        private const float EnemyStartX = 100f;
+        private const float EnemyStartY = 20f;
 
         private const float startX = 350f;
         private const float startY = 510f;
 
         public List<Enemy> Enemies = new List<Enemy>();
 
-        public List<Projectile> PlayerProjectiles { get; } = new();
-        public List<Projectile> EnemyProjectiles { get; } = new();
+        public List<Projectile>Projectiles { get; } = new();
 
 
         public Player Player { get; } = new Player(startX, startY);
@@ -67,40 +71,83 @@ namespace SimpleGame.GameWorldCatalog
 
         public bool IsGameOver { get; private set; } = false;
 
+        private void SpawnPlayerProjectile()
+        {
+            var proj = new Projectile
+            {
+                X = Player.X + Player.Width / 2 - 4,
+                Y = Player.Y - 8,
+                IsPlayerBullet = true
+            };
+
+            Projectiles.Add(proj);
+            NewVisuals.Add(proj);
+        }
+
+
         /// <summary>
         /// Method to update world, move enemies, end the game
         /// </summary>
         /// <param name="deltaTime"></param>
-        public void Update(float deltaTime, bool leftPressed, bool rightPressed)
+        public void Update(float deltaTime, bool leftPressed, bool rightPressed, bool spacePressed)
         {
             if (IsGameOver) return;
             if (PlayerLives == 0) { IsGameOver = true; return; }
 
-            const float playerSpeed = 250f;
+            if (Enemies.Count == 0)
+            {
+                SpawnEnemies();
+                _enemyDirectionX = 1f;
+            }
+
+            const float playerSpeed = 200f;
             if (leftPressed) Player.MoveX(-playerSpeed * deltaTime);
             if (rightPressed) Player.MoveX(playerSpeed * deltaTime);
 
-            if (PlayerLives == 0 )
-            { 
+            if (spacePressed && _canPlayerShoot)
+            {
+                SpawnPlayerProjectile();
+                _canPlayerShoot = false;
+            }
+
+            if (!Projectiles.Any(p => p.IsPlayerBullet))
+                _canPlayerShoot = true;
+
+            foreach (var proj in Projectiles.ToList())
+            {
+                if (proj.IsPlayerBullet)
+                    proj.MoveY(-ProjectileSpeed * deltaTime);
+                else
+                    proj.MoveY(ProjectileSpeed * deltaTime);
+
+                if (proj.Y + proj.Height < 0 || proj.Y > WorldHeightY)
+                {
+                    RemovedVisuals.Add(proj);
+                    Projectiles.Remove(proj);
+                }
+            }
+
+            if (PlayerLives == 0)
+            {
                 IsGameOver = true;
                 return;
             }
 
             bool needReverse = false;
 
-            foreach(var enemy in Enemies)
+            foreach (var enemy in Enemies)
             {
-                if(_enemyDirectionX > 0 && enemy.X + enemy.Width >= WorldWidthX)
+                if (_enemyDirectionX > 0 && enemy.X + enemy.Width >= WorldWidthX)
                 {
                     needReverse = true;
                 }
-                if(_enemyDirectionX < 0 && enemy.X <=0)
+                if (_enemyDirectionX < 0 && enemy.X <= 0)
                 {
                     needReverse = true;
                 }
             }
 
-            if(needReverse)
+            if (needReverse)
             {
                 _enemyDirectionX *= -1f;
                 foreach (var enemy in Enemies)
@@ -110,11 +157,56 @@ namespace SimpleGame.GameWorldCatalog
             foreach (var enemy in Enemies)
             {
                 enemy.MoveX(EnemySpeed * deltaTime * _enemyDirectionX);
-                
-            }
 
+            }
+            CheckCollisions();
 
         }
+
+        private void CheckCollisions()
+        {
+            var toRemove = new List<GameObject>();
+
+            foreach (var proj in Projectiles.Where(p => p.IsPlayerBullet).ToList())
+            {
+                foreach (var enemy in Enemies.ToList())
+                {
+                    if (proj.Intersects(enemy))
+                    {
+                        toRemove.Add(proj);
+                        toRemove.Add(enemy);
+                        UpdateScore(enemy.Score);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var proj in Projectiles.Where(p => p.IsPlayerBullet).ToList())
+            {
+                if (toRemove.Contains(proj)) continue;
+
+                foreach (var barricade in Barricades.ToList())
+                {
+                    if (proj.Intersects(barricade))
+                    {
+                        toRemove.Add(proj);
+                        toRemove.Add(barricade);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var obj in toRemove)
+            {
+                RemovedVisuals.Add(obj);
+
+                if (obj is Projectile p) Projectiles.Remove(p);
+                else if (obj is Enemy e) Enemies.Remove(e);
+                else if (obj is Barricade b) Barricades.Remove(b);
+            }
+        }
+
+
         /// <summary>
         /// Method to spawn enemies in 5 rows and 9 cols, 45 enemies
         /// </summary>
@@ -140,6 +232,7 @@ namespace SimpleGame.GameWorldCatalog
                     enemy.X = x;
                     enemy.Y = y;
                     Enemies.Add(enemy);
+                    NewVisuals.Add(enemy);
                 }
             }
         }
@@ -171,6 +264,7 @@ namespace SimpleGame.GameWorldCatalog
                 }
             }
         }
+
 
     }
 }
