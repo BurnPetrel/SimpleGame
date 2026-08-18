@@ -102,6 +102,15 @@ namespace SimpleGame
                 enemy.UpdateVisualPosition();
             foreach (var proj in _world.Projectiles)
                 proj.UpdateVisualPosition();
+
+            ScoreTextBlock.Text = $"Score: {_world.PlayerScore}";
+            LivesTextBlock.Text = $"Lives: {_world.PlayerLives}";
+
+            if (_world.IsGameOver)
+            {
+                ScoreTextBlock.Text = $"Game Over! Score: {_world.PlayerScore}";
+                ScoreTextBlock.Foreground = System.Windows.Media.Brushes.Red; 
+            }
         }
     }
 }

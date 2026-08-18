@@ -6,5 +6,25 @@
         xmlns:local="clr-namespace:SimpleGame"
         mc:Ignorable="d"
         Title="Space Invaders" Height="600" Width="800">
-    <Canvas x:Name="GameCanvas" Background="GhostWhite" />
+
+    <Grid>
+        <Canvas x:Name="GameCanvas" Background="Black" />
+
+        <TextBlock x:Name="ScoreTextBlock" 
+                   Text="Score: 0" 
+                   FontSize="24" 
+                   FontWeight="Bold" 
+                   Foreground="White" 
+                   Margin="10,10,0,0" 
+                   HorizontalAlignment="Left" 
+                   VerticalAlignment="Top"/>
+        <TextBlock x:Name="LivesTextBlock" 
+            Text="Lives: 0" 
+            FontSize="24" 
+            FontWeight="Bold" 
+            Foreground="White" 
+            Margin="10,10,0,0" 
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Top"/>
+    </Grid>
 </Window>

@@ -12,6 +12,10 @@ namespace SimpleGame.GameWorldCatalog
     public class GameWorld
     {
 
+        private readonly Random _random = new Random();
+
+        private float _enemyShootTime = 1.5f;
+
         private const int EnemyRows = 5;
 
         private const int BarricadeCount = 4;
@@ -84,6 +88,21 @@ namespace SimpleGame.GameWorldCatalog
             NewVisuals.Add(proj);
         }
 
+        private void SpawnEnemyProjectile (Enemy shooter)
+        {
+            var proj = new Projectile
+            {
+                X = shooter.X + shooter.Width / 2f - 2.5f,
+                Y = shooter.Y + shooter.Height,
+                IsPlayerBullet = false
+
+
+            };
+
+            Projectiles.Add(proj);
+            NewVisuals.Add(proj);
+
+        }
 
         /// <summary>
         /// Method to update world, move enemies, end the game
@@ -159,6 +178,21 @@ namespace SimpleGame.GameWorldCatalog
                 enemy.MoveX(EnemySpeed * deltaTime * _enemyDirectionX);
 
             }
+
+            if(Enemies.Count > 0)
+            {
+                _enemyShootTime -= deltaTime;
+                
+                if(_enemyShootTime <= 0)
+                {
+                    int randomIndex = _random.Next(Enemies.Count);
+                    SpawnEnemyProjectile(Enemies[randomIndex]);
+
+                    _enemyShootTime = (float)_random.NextDouble() * 0.7f + 0.5f;
+                }
+
+            }
+
             CheckCollisions();
 
         }
@@ -193,6 +227,60 @@ namespace SimpleGame.GameWorldCatalog
                         toRemove.Add(barricade);
                         break;
                     }
+                }
+            }
+
+            foreach (var proj in Projectiles.Where(p => !p.IsPlayerBullet).ToList())
+            {
+                if (proj.Intersects(Player))
+                {
+                    toRemove.Add(proj);
+                    PlayerLives--;
+
+                    if (PlayerLives <= 0)
+                    {
+                        IsGameOver = true;
+                    }
+                    else
+                    {
+                        
+                        Player.X = startX;
+                        Player.Y = startY;
+
+                        
+                        
+                        foreach (var enemyProj in Projectiles.Where(p => !p.IsPlayerBullet).ToList())
+                        {
+                            toRemove.Add(enemyProj);
+                        }
+                        
+                    }
+                    break;
+                }
+            }
+
+            foreach (var proj in Projectiles.Where(p => !p.IsPlayerBullet).ToList())
+            {
+                if (toRemove.Contains(proj)) continue;
+
+                foreach (var barricade in Barricades.ToList())
+                {
+                    if (proj.Intersects(barricade))
+                    {
+                        toRemove.Add(proj);
+                        toRemove.Add(barricade);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var enemy in Enemies)
+            {
+                if (enemy.Intersects(Player))
+                {
+                    PlayerLives = 0;
+                    IsGameOver = true;
+                    break;
                 }
             }
 
